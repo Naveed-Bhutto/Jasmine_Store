@@ -1,0 +1,46 @@
+# ============================================================
+# Jasmine Store — auto-build & deploy to GitHub Pages (FREE)
+# ------------------------------------------------------------
+# Every time you push a change (e.g. an updated products.json),
+# this workflow:
+#   1. injects products.json into index.html
+#   2. publishes the site to GitHub Pages
+# Result: edit ONE json file on github.com → site updates itself.
+# ============================================================
+name: Build & Deploy Jasmine Store
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:        # manual "Run workflow" button
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Inject products.json into index.html
+        run: python3 tools/update_products.py
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
