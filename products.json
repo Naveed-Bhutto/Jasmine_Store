@@ -170,5 +170,20 @@
     "emoji": "✨",
     "tint": "#d9c8a9",
     "affiliateLink": "https://www.daraz.pk/products/EXAMPLE12"
-  }
+  },
+  {
+    "id": 13,
+    "title": "Ladies Purse",
+    "description": "Top On Sale Product Recommendations!\nWomen Mini Crossbody Bag With Double Zippers Large Capacity Coin Purse PU Leather Wallet\nPrice Now: PKR 1801.57 (Original price: PKR 3603.15,  50% off)\n🔗Click & Buy: https://s.click.aliexpress.com/e/_c4PlQcyf",
+    "price": 1800,
+    "originalPrice": 1801.75,
+    "currency": "Rs.",
+    "platform": "AliExpress",
+    "category": "Beauty",
+    "rating": 4.5,
+    "imageURL": "",
+    "emoji": "🌸",
+    "tint": "#7d782f",
+    "affiliateLink": "https://s.click.aliexpress.com/e/_c4PlQcyf",
+   }
 ]
