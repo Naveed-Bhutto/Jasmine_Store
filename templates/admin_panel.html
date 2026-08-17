@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Panel — Jasmine Store</title>
+<style>
+  :root{
+    --bg:#f7f2e6; --card:#fffdf7; --border:rgba(107,124,88,.2); --text:#3d4a34;
+    --muted:#6f7a63; --sage:#6f8a5e; --sage2:#55704a; --gold:#c9a86a; --danger:#c25e5e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding:2rem 1rem}
+  .wrap{max-width:1150px;margin-inline:auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1.4rem}
+  h1{font-size:1.5rem;color:var(--sage2)} h1 span{color:var(--gold)}
+  .sub{color:var(--muted);font-size:.9rem}
+  .live{display:inline-block;font-size:.72rem;font-weight:800;padding:.2rem .7rem;border-radius:999px;background:var(--sage);color:#fff;text-transform:uppercase;letter-spacing:.06em}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
+  .panel h2{font-size:1.05rem;margin-bottom:1rem;color:var(--sage2)}
+  label{display:block;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:.8rem 0 .25rem}
+  input,select,textarea{width:100%;padding:.55rem .8rem;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font:inherit;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(111,138,94,.15)}
+  textarea{resize:vertical;min-height:64px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem}
+  .btn{display:inline-block;padding:.6rem 1.2rem;border:none;border-radius:999px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s;margin:.25rem .25rem .25rem 0}
+  .btn-p{background:var(--sage);color:#fff} .btn-p:hover{background:var(--sage2)}
+  .btn-g{background:var(--gold);color:#fff} .btn-g:hover{filter:brightness(.93)}
+  .btn-o{background:none;border:1px solid var(--border);color:var(--muted)} .btn-o:hover{color:var(--text)}
+  .btn-d{background:none;border:1px solid rgba(194,94,94,.4);color:var(--danger)}
+  .list-item{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.6rem .8rem;border:1px solid var(--border);border-radius:8px;margin-bottom:.5rem;background:#fff;font-size:.88rem}
+  .list-item .meta{color:var(--muted);font-size:.78rem}
+  .tag{font-size:.68rem;font-weight:800;padding:.15rem .55rem;border-radius:999px;color:#fff;text-transform:uppercase}
+  .tag.AliExpress{background:#ff4747}.tag.Daraz{background:#f57224}.tag.Amazon{background:#ff9900}
+  .msg{min-height:1.3em;font-size:.85rem;font-weight:600;color:var(--sage2);margin-top:.5rem;word-break:break-word}
+  .hint{font-size:.78rem;color:var(--muted);margin-top:.4rem}
+  .method2{border-left:4px solid var(--gold)}
+  code{background:rgba(111,138,94,.1);padding:.1rem .35rem;border-radius:4px;font-size:.82em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1>🌸 Jasmine <span>Store</span> — Admin Panel <span class="live">● Live</span></h1>
+      <p class="sub">Every save updates <b>index.html</b> instantly — refresh the site to see changes.</p>
+    </div>
+    <div>
+      <a class="btn btn-o" href="/" target="_blank">👁️ View site</a>
+      <a class="btn btn-d" href="/admin/logout">Log out</a>
+    </div>
+  </div>
+
+  <div class="cols">
+    <!-- ============ METHOD 1: FORM ============ -->
+    <div class="panel">
+      <h2>➕ Method 1 — Add / Edit Product</h2>
+      <form id="f">
+        <input type="hidden" id="pid" />
+        <label>Product title</label>
+        <input id="title" required placeholder="e.g. Gold-Plated Pearl Jewellery Set" />
+
+        <label>Short benefit-driven description</label>
+        <textarea id="description" required placeholder="Why should she love it? 1–2 punchy sentences."></textarea>
+        <button type="button" class="btn btn-g" id="aiPrompt">✨ Copy AI prompt for title & description</button>
+
+        <div class="row3">
+          <div><label>Deal price</label><input id="price" type="number" step="0.01" min="0" required placeholder="18.99" /></div>
+          <div><label>Original price</label><input id="originalPrice" type="number" step="0.01" min="0" required placeholder="39.99" /></div>
+          <div><label>Currency</label>
+            <select id="currency"><option value="">$ (USD)</option><option value="Rs.">Rs. (PKR)</option></select></div>
+        </div>
+
+        <div class="row3">
+          <div><label>Platform</label>
+            <select id="platform"><option>AliExpress</option><option>Daraz</option><option>Amazon</option></select></div>
+          <div><label>Category</label><input id="category" required placeholder="Home Décor" list="cats" />
+            <datalist id="cats"><option>Home Décor</option><option>Jewellery</option><option>Beauty</option><option>Bedroom</option><option>Kitchen</option></datalist></div>
+          <div><label>Rating (0–5)</label><input id="rating" type="number" step="0.1" min="0" max="5" required placeholder="4.7" /></div>
+        </div>
+
+        <label>Product image URL (leave empty for elegant placeholder)</label>
+        <input id="imageURL" placeholder="https://…jpg" />
+
+        <label>Affiliate link (your tracked link!)</label>
+        <input id="affiliateLink" required placeholder="https://s.click.aliexpress.com/e/_XXXX" />
+
+        <div class="row">
+          <div><label>Emoji (placeholder art)</label><input id="emoji" value="🌸" /></div>
+          <div><label>Tint colour</label><input id="tint" type="color" value="#c9a86a" style="height:42px;padding:.2rem" /></div>
+        </div>
+
+        <br />
+        <button class="btn btn-p" type="submit" id="submitBtn">💾 Save → publish to index.html</button>
+        <button class="btn btn-o" type="button" id="clearForm">Clear</button>
+        <p class="msg" id="formMsg"></p>
+      </form>
+    </div>
+
+    <!-- ============ LIST + METHOD 2 ============ -->
+    <div>
+      <div class="panel">
+        <h2>📦 Live Products (<span id="count">…</span>)</h2>
+        <div id="list"><p class="hint">Loading…</p></div>
+      </div>
+
+      <br />
+      <div class="panel method2">
+        <h2>📂 Method 2 — Update via products.json</h2>
+        <p class="hint" style="margin-bottom:.8rem">
+          Prefer editing JSON? Two ways — both re-inject <b>index.html</b> instantly:
+        </p>
+        <label class="btn btn-g" style="cursor:pointer">⬆️ Upload products.json<input type="file" id="importFile" accept=".json" hidden /></label>
+        <button class="btn btn-p" id="reload">🔄 Re-inject products.json from disk</button>
+        <a class="btn btn-o" href="/products.json" download>⬇️ Download current products.json</a>
+        <p class="hint">The "re-inject" button is for when you've edited <code>products.json</code> directly on the server (SSH/editor) and want the site rebuilt.</p>
+        <p class="msg" id="jsonMsg"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const FIELDS = ["title","description","price","originalPrice","currency","platform","category","rating","imageURL","affiliateLink","emoji","tint"];
+let cache = [];
+
+/* ---------- api helpers ---------- */
+async function api(path, body) {
+  const res = await fetch(path, {
+    method: body === undefined ? "GET" : "POST",
+    headers: { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body)
+  });
+  if (res.status === 401) { location.href = "/admin"; return null; }
+  return res.json();
+}
+
+/* ---------- render live list ---------- */
+async function refresh() {
+  cache = await api("/api/products") || [];
+  $("count").textContent = cache.length;
+  $("list").innerHTML = cache.length === 0
+    ? '<p class="hint">No products yet — add your first with Method 1 or upload a products.json.</p>'
+    : cache.map(p => `
+      <div class="list-item">
+        <div>
+          <b>${p.emoji || "🌸"} ${esc(p.title)}</b>
+          <div class="meta">${p.currency ? p.currency + " " : "$"}${p.price} · ${esc(p.category)} · ★${p.rating}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
+          <span class="tag ${p.platform}">${p.platform}</span>
+          <button class="btn btn-o" onclick="editP(${p.id})">✏️</button>
+          <button class="btn btn-d" onclick="delP(${p.id})">✕</button>
+        </div>
+      </div>`).join("");
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- METHOD 1: add / edit / delete ---------- */
+$("f").addEventListener("submit", async e => {
+  e.preventDefault();
+  const p = {};
+  FIELDS.forEach(f => {
+    let v = $(f).value.trim();
+    if (["price","originalPrice","rating"].includes(f)) v = parseFloat(v);
+    if (v !== "" && v !== undefined && !(typeof v === "number" && isNaN(v))) p[f] = v;
+  });
+  if (!p.currency) delete p.currency;
+  if (!p.imageURL) p.imageURL = "";
+  if ($("pid").value) p.id = parseInt($("pid").value);
+
+  if (p.price >= p.originalPrice) return flash("formMsg", "⚠️ Deal price must be LOWER than original price.", true);
+  if (!/^https:\/\//.test(p.affiliateLink)) return flash("formMsg", "⚠️ Affiliate link must start with https://", true);
+
+  const r = await api("/api/products", p);
+  flash("formMsg", r.message, !r.ok);
+  if (r.ok) { e.target.reset(); $("pid").value = ""; $("emoji").value = "🌸"; $("tint").value = "#c9a86a"; $("submitBtn").textContent = "💾 Save → publish to index.html"; refresh(); }
+});
+
+window.editP = id => {
+  const p = cache.find(x => x.id === id);
+  FIELDS.forEach(f => { if (p[f] !== undefined) $(f).value = p[f]; });
+  $("pid").value = id;
+  $("submitBtn").textContent = "💾 Save changes → publish";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+window.delP = async id => {
+  if (!confirm("Delete this product from the live site?")) return;
+  const r = await api("/api/products/delete", { id });
+  flash("jsonMsg", r.message, !r.ok);
+  refresh();
+};
+
+$("clearForm").onclick = () => { $("f").reset(); $("pid").value = ""; $("submitBtn").textContent = "💾 Save → publish to index.html"; };
+
+/* ---------- METHOD 2: products.json ---------- */
+$("importFile").onchange = async e => {
+  const file = e.target.files[0]; if (!file) return;
+  let data;
+  try { data = JSON.parse(await file.text()); }
+  catch { return flash("jsonMsg", "⚠️ That file is not valid JSON.", true); }
+  const r = await api("/api/replace", data);
+  flash("jsonMsg", r.message, !r.ok);
+  refresh();
+  e.target.value = "";
+};
+
+$("reload").onclick = async () => {
+  const r = await api("/api/reload", {});
+  flash("jsonMsg", r.message, !r.ok);
+  refresh();
+};
+
+/* ---------- AI prompt ---------- */
+$("aiPrompt").onclick = () => {
+  const prompt =
+`You are the copywriter for "Jasmine Store", a curated affiliate shop with the tagline "Affordable elegance for everyday living". The brand voice is elegant, feminine, warm and modern — never salesy or spammy.
+
+For the product below, write:
+1. A concise product TITLE (max 8 words, title case).
+2. A benefit-driven DESCRIPTION (max 20 words, 1–2 sentences).
+
+Return ONLY valid JSON: {"title": "...", "description": "..."}
+
+Product info (pasted from the store page):
+<<< PASTE THE PRODUCT PAGE TITLE / DETAILS HERE >>>`;
+  navigator.clipboard.writeText(prompt).then(() => flash("formMsg", "✨ AI prompt copied — paste into ChatGPT / Gemini!"));
+};
+
+function flash(id, text, isErr) {
+  const el = $(id);
+  el.textContent = text;
+  el.style.color = isErr ? "var(--danger)" : "var(--sage2)";
+  setTimeout(() => { el.textContent = ""; }, 7000);
+}
+
+refresh();
+</script>
+</body>
+</html>
