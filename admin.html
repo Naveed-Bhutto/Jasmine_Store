@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jasmine Store — Product Manager (Admin)</title>
+<style>
+  :root{
+    --bg:#f7f2e6; --card:#fffdf7; --border:rgba(107,124,88,.2); --text:#3d4a34;
+    --muted:#6f7a63; --sage:#6f8a5e; --sage2:#55704a; --gold:#c9a86a; --danger:#c25e5e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding:2rem 1rem}
+  .wrap{max-width:1150px;margin-inline:auto}
+  h1{font-size:1.6rem;color:var(--sage2)} h1 span{color:var(--gold)}
+  .sub{color:var(--muted);margin:.3rem 0 1.6rem;font-size:.92rem}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
+  .panel h2{font-size:1.05rem;margin-bottom:1rem;color:var(--sage2)}
+  label{display:block;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:.8rem 0 .25rem}
+  input,select,textarea{width:100%;padding:.55rem .8rem;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font:inherit;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(111,138,94,.15)}
+  textarea{resize:vertical;min-height:64px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem}
+  .btn{display:inline-block;padding:.6rem 1.2rem;border:none;border-radius:999px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s;margin:.25rem .25rem .25rem 0}
+  .btn-p{background:var(--sage);color:#fff} .btn-p:hover{background:var(--sage2)}
+  .btn-g{background:var(--gold);color:#fff} .btn-g:hover{filter:brightness(.93)}
+  .btn-o{background:none;border:1px solid var(--border);color:var(--muted)} .btn-o:hover{color:var(--text)}
+  .btn-d{background:none;border:1px solid rgba(194,94,94,.4);color:var(--danger)}
+  .list-item{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.6rem .8rem;border:1px solid var(--border);border-radius:8px;margin-bottom:.5rem;background:#fff;font-size:.88rem}
+  .list-item .meta{color:var(--muted);font-size:.78rem}
+  .tag{font-size:.68rem;font-weight:800;padding:.15rem .55rem;border-radius:999px;color:#fff;text-transform:uppercase}
+  .tag.AliExpress{background:#ff4747}.tag.Daraz{background:#f57224}.tag.Amazon{background:#ff9900}
+  pre{background:#2f3a28;color:#dce8d0;border-radius:10px;padding:1rem;font-size:.75rem;overflow-x:auto;white-space:pre-wrap;max-height:340px;overflow-y:auto}
+  .msg{min-height:1.3em;font-size:.85rem;font-weight:600;color:var(--sage2);margin-top:.5rem}
+  .hint{font-size:.78rem;color:var(--muted);margin-top:.4rem}
+  details{margin-top:1rem} summary{cursor:pointer;font-weight:700;color:var(--sage2);font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🌸 Jasmine <span>Store</span> — Product Manager</h1>
+  <p class="sub">Add real affiliate products without touching code. Fill the form → Add → Download <b>products.json</b> → run <code>python3 tools/update_products.py</code> (or commit to GitHub and let the Action do it). Data is saved in your browser (localStorage) so nothing is lost between sessions.</p>
+
+  <div class="cols">
+    <!-- ============ FORM ============ -->
+    <div class="panel">
+      <h2>➕ Add / Edit Product</h2>
+      <form id="f">
+        <label>Product title</label>
+        <input id="title" required placeholder="e.g. Gold-Plated Pearl Jewellery Set" />
+
+        <label>Short benefit-driven description</label>
+        <textarea id="description" required placeholder="Why should she love it? 1–2 punchy sentences."></textarea>
+        <button type="button" class="btn btn-g" id="aiPrompt">✨ Copy AI prompt for title & description</button>
+        <p class="hint">Paste the copied prompt into ChatGPT / Gemini / Claude (all free) along with the product's store page text — it returns polished, on-brand copy.</p>
+
+        <div class="row3">
+          <div><label>Deal price</label><input id="price" type="number" step="0.01" min="0" required placeholder="18.99" /></div>
+          <div><label>Original price</label><input id="originalPrice" type="number" step="0.01" min="0" required placeholder="39.99" /></div>
+          <div><label>Currency</label>
+            <select id="currency"><option value="">$ (USD)</option><option value="Rs.">Rs. (PKR)</option></select></div>
+        </div>
+
+        <div class="row3">
+          <div><label>Platform</label>
+            <select id="platform"><option>AliExpress</option><option>Daraz</option><option>Amazon</option></select></div>
+          <div><label>Category</label><input id="category" required placeholder="Home Décor" list="cats" />
+            <datalist id="cats"><option>Home Décor</option><option>Jewellery</option><option>Beauty</option><option>Bedroom</option><option>Kitchen</option></datalist></div>
+          <div><label>Rating (0–5)</label><input id="rating" type="number" step="0.1" min="0" max="5" required placeholder="4.7" /></div>
+        </div>
+
+        <label>Product image URL <span style="text-transform:none;font-weight:500">(right-click product photo → Copy image address; leave empty for a placeholder)</span></label>
+        <input id="imageURL" placeholder="https://…jpg" />
+
+        <label>Affiliate link (your tracked link!)</label>
+        <input id="affiliateLink" required placeholder="https://s.click.aliexpress.com/e/_XXXX" />
+
+        <div class="row">
+          <div><label>Emoji (placeholder art)</label><input id="emoji" value="🌸" /></div>
+          <div><label>Tint colour</label><input id="tint" type="color" value="#c9a86a" style="height:42px;padding:.2rem" /></div>
+        </div>
+
+        <br />
+        <button class="btn btn-p" type="submit" id="submitBtn">Add product</button>
+        <button class="btn btn-o" type="button" id="clearForm">Clear</button>
+        <p class="msg" id="formMsg"></p>
+      </form>
+    </div>
+
+    <!-- ============ LIST + EXPORT ============ -->
+    <div class="panel">
+      <h2>📦 Your Products (<span id="count">0</span>)</h2>
+      <div id="list"></div>
+
+      <br />
+      <button class="btn btn-p" id="download">⬇️ Download products.json</button>
+      <button class="btn btn-g" id="copyJson">📋 Copy JSON</button>
+      <label class="btn btn-o" style="cursor:pointer">📂 Import products.json<input type="file" id="importFile" accept=".json" hidden /></label>
+      <button class="btn btn-d" id="wipe">🗑️ Delete all</button>
+      <p class="msg" id="listMsg"></p>
+
+      <details>
+        <summary>Preview JSON</summary>
+        <pre id="preview"></pre>
+      </details>
+
+      <details>
+        <summary>How do I publish these to the live site?</summary>
+        <p class="hint" style="margin-top:.6rem">
+          <b>Option A (local):</b> Download products.json into the website folder, then run
+          <code>python3 tools/update_products.py</code> and re-upload index.html.<br /><br />
+          <b>Option B (GitHub, automatic):</b> Commit products.json to your repo — the included
+          GitHub Action rebuilds index.html and redeploys the site for you. Zero manual steps.
+        </p>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- storage ---------- */
+const KEY = "jasmine_products";
+let products = [];
+try { products = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { products = []; }
+let editId = null;
+
+const $ = id => document.getElementById(id);
+const FIELDS = ["title","description","price","originalPrice","currency","platform","category","rating","imageURL","affiliateLink","emoji","tint"];
+
+function save() { localStorage.setItem(KEY, JSON.stringify(products)); render(); }
+
+/* ---------- render ---------- */
+function render() {
+  $("count").textContent = products.length;
+  $("preview").textContent = JSON.stringify(products, null, 2);
+  $("list").innerHTML = products.length === 0
+    ? '<p class="hint">No products yet — add your first one on the left, or import an existing products.json.</p>'
+    : products.map(p => `
+      <div class="list-item">
+        <div>
+          <b>${p.emoji || "🌸"} ${p.title}</b>
+          <div class="meta">${p.currency ? p.currency + " " : "$"}${p.price} · ${p.category} · ★${p.rating}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
+          <span class="tag ${p.platform}">${p.platform}</span>
+          <button class="btn btn-o" onclick="editP(${p.id})">✏️</button>
+          <button class="btn btn-d" onclick="delP(${p.id})">✕</button>
+        </div>
+      </div>`).join("");
+}
+
+/* ---------- add / edit ---------- */
+$("f").addEventListener("submit", e => {
+  e.preventDefault();
+  const p = {};
+  FIELDS.forEach(f => {
+    let v = $(f).value.trim();
+    if (["price","originalPrice","rating"].includes(f)) v = parseFloat(v);
+    if (v !== "" && v !== undefined && !(typeof v === "number" && isNaN(v))) p[f] = v;
+  });
+  if (!p.currency) delete p.currency;
+  if (!p.imageURL) p.imageURL = "";
+
+  /* validation */
+  if (p.price >= p.originalPrice) return flash("formMsg", "⚠️ Deal price must be LOWER than original price.", true);
+  if (!/^https:\/\//.test(p.affiliateLink)) return flash("formMsg", "⚠️ Affiliate link must start with https://", true);
+
+  if (editId !== null) {
+    const i = products.findIndex(x => x.id === editId);
+    products[i] = { id: editId, ...p };
+    editId = null;
+    $("submitBtn").textContent = "Add product";
+    flash("formMsg", "✅ Product updated!");
+  } else {
+    p.id = products.length ? Math.max(...products.map(x => x.id)) + 1 : 1;
+    products.push(p);
+    flash("formMsg", "✅ Added! It's now in your list →");
+  }
+  save();
+  e.target.reset();
+  $("emoji").value = "🌸"; $("tint").value = "#c9a86a";
+});
+
+window.editP = id => {
+  const p = products.find(x => x.id === id);
+  FIELDS.forEach(f => { if (p[f] !== undefined) $(f).value = p[f]; });
+  editId = id;
+  $("submitBtn").textContent = "Save changes";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+window.delP = id => { products = products.filter(x => x.id !== id); save(); };
+
+$("clearForm").onclick = () => { $("f").reset(); editId = null; $("submitBtn").textContent = "Add product"; };
+
+/* ---------- AI prompt generator ---------- */
+$("aiPrompt").onclick = () => {
+  const prompt =
+`You are the copywriter for "Jasmine Store", a curated affiliate shop with the tagline "Affordable elegance for everyday living". The brand voice is elegant, feminine, warm and modern — never salesy or spammy.
+
+For the product below, write:
+1. A concise product TITLE (max 8 words, title case).
+2. A benefit-driven DESCRIPTION (max 20 words, 1–2 sentences) that helps a woman imagine this piece making her home or routine lovelier.
+
+Return ONLY valid JSON: {"title": "...", "description": "..."}
+
+Product info (pasted from the store page):
+<<< PASTE THE PRODUCT PAGE TITLE / DETAILS HERE >>>`;
+  navigator.clipboard.writeText(prompt).then(() => flash("formMsg", "✨ AI prompt copied — paste it into ChatGPT / Gemini!"));
+};
+
+/* ---------- export / import ---------- */
+$("download").onclick = () => {
+  const blob = new Blob([JSON.stringify(products, null, 2)], { type: "application/json" });
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: "products.json" });
+  a.click(); URL.revokeObjectURL(a.href);
+  flash("listMsg", "⬇️ Downloaded — drop it in the website folder & run the update script.");
+};
+$("copyJson").onclick = () =>
+  navigator.clipboard.writeText(JSON.stringify(products, null, 2)).then(() => flash("listMsg", "📋 JSON copied to clipboard!"));
+$("importFile").onchange = e => {
+  const file = e.target.files[0]; if (!file) return;
+  file.text().then(t => {
+    try { products = JSON.parse(t); save(); flash("listMsg", `📂 Imported ${products.length} products.`); }
+    catch { flash("listMsg", "⚠️ That file isn't valid JSON.", true); }
+  });
+};
+$("wipe").onclick = () => { if (confirm("Delete ALL products from this browser?")) { products = []; save(); } };
+
+function flash(id, text, isErr) {
+  const el = $(id);
+  el.textContent = text;
+  el.style.color = isErr ? "var(--danger)" : "var(--sage2)";
+  setTimeout(() => { el.textContent = ""; }, 5000);
+}
+
+render();
+</script>
+</body>
+</html>
